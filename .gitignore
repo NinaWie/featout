@@ -1,0 +1,7 @@
+.vscode/
+__pycache__/
+data/
+trained_models/
+project_featout.code-workspace
+.DS_Store
+backups/
