@@ -51,6 +51,10 @@ for epoch in range(5):
     running_loss = 0.0
     blurred_set = []
 
+    # iterate over training set and select the images that were correct
+    if (epoch) % 2 == 0:  # change to every 2nd epoch etc
+        trainloader.dataset.start_featout(net)
+
     for i, data in enumerate(trainloader, 0):
         # get the inputs
         inputs, labels = data
@@ -71,8 +75,6 @@ for epoch in range(5):
                 (epoch + 1, i + 1, running_loss / 2000)
             )
             running_loss = 0.0
-
-    # iterate over training set and select the images that were correct
 
     # blurr part
 

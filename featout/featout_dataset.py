@@ -16,32 +16,41 @@ class Featout(torchvision.datasets.CIFAR10):
         self.featout = False
 
     def __getitem__(self, index):
-        image = super().__getitem__(index)
-        # image = self.images[index]  # TODO: call getitem from super instead
+        image, label = super().__getitem__(index)
 
         if self.featout:
-            label = self.labels[index]  # TODO: where to get label from
-            gradients = self.algorithm(self.featout_model, image, label)
+            # TODO: batch the gradient computing? would probably be a speed up
+            in_img = torch.unsqueeze(image, 0)
+            gradients = torch.squeeze(
+                self.algorithm(self.featout_model, in_img, label)
+            ).numpy()
             # Compute point of maximum activation
             # TODO: make the following lines more flexible, was for testing
             # TODO: add smoothing of gradients
-            grads_mean = np.mean(gradients, axis=2)
-            max_x = np.argmax(grads_mean.flatten()) // image.size()[1]
-            max_y = np.argmax(grads_mean.flatten()) % image.size()[1]
+            grads_mean = np.mean(gradients, axis=0)
+            max_x = np.argmax(grads_mean.flatten()) // grads_mean.shape[1]
+            max_y = np.argmax(grads_mean.flatten()) % grads_mean.shape[1]
             # blurr out and write into image variable
-            image = self.blur_method(image, (max_x, max_y), patch_radius=4)
-            image = TF.to_tensor(image)
-        return image
+            image = torch.squeeze(
+                self.blur_method(in_img, (max_x, max_y), patch_radius=4)
+            )
+            # TODO: test by saving the image before and after
+        return image, label
 
     def start_featout(
-        self, model, blur_method=zero_out, algorithm=simple_gradient_saliency
+        self,
+        model,
+        blur_method=blur_around_max,
+        algorithm=simple_gradient_saliency
     ):
         """
         We can set here whether we want to blur or zero and what gradient alg
         """
         # TODO: pass predicted labels because we only do featout if it is
         # predicted correctly
+        print("start featout")
         self.featout = True
+        self.algorithm = simple_gradient_saliency
         self.featout_model = model
         self.blur_method = blur_method
         self.gradient_algorithm = algorithm
