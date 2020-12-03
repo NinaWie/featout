@@ -1,4 +1,4 @@
-from utils.gaussian_smoothing import GaussianSmoothing
+from featout.utils.gaussian_smoothing import GaussianSmoothing
 import torch.nn.functional as F
 
 

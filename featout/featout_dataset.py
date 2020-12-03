@@ -3,20 +3,21 @@ import torchvision
 import torchvision.transforms.functional as TF
 import numpy as np
 
-from interpret import simple_gradient_saliency
-from utils.blur import zero_out, blur_around_max
+from featout.interpret import simple_gradient_saliency
+from featout.utils.blur import zero_out, blur_around_max
 
 
 # Inherit from any pytorch dataset class
 class Featout(torchvision.datasets.CIFAR10):
 
-    def __init__(self, **args):
-        super().__init__(**args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # initial stage: no blurring
         self.featout = False
 
     def __getitem__(self, index):
-        image = self.images[index]  # TODO: call getitem from super instead
+        image = super().__getitem__(index)
+        # image = self.images[index]  # TODO: call getitem from super instead
 
         if self.featout:
             label = self.labels[index]  # TODO: where to get label from
@@ -29,9 +30,8 @@ class Featout(torchvision.datasets.CIFAR10):
             max_y = np.argmax(grads_mean.flatten()) % image.size()[1]
             # blurr out and write into image variable
             image = self.blur_method(image, (max_x, max_y), patch_radius=4)
-
-        x = TF.to_tensor(image)
-        return x
+            image = TF.to_tensor(image)
+        return image
 
     def start_featout(
         self, model, blur_method=zero_out, algorithm=simple_gradient_saliency
@@ -48,9 +48,6 @@ class Featout(torchvision.datasets.CIFAR10):
 
     def stop_featout(self, ):
         self.featout = False
-
-    def __len__(self):
-        return len(self.images)
 
 
 # Inspired from https://discuss.pytorch.org/t/changing-transformation-applied-to-data-during-training/15671/3

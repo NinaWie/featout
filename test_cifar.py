@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import torch
+import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
@@ -9,8 +10,10 @@ import torchvision.transforms.functional as TF
 from torchvision import models
 import torch.optim as optim
 
-from model import Net
+from featout.model import Net
+from featout.featout_dataset import Featout
 
+# augmentation
 transform = transforms.Compose(
     [
         transforms.ToTensor(),
@@ -18,11 +21,19 @@ transform = transforms.Compose(
     ]
 )
 
+# USE NEW CLASS
+trainset = Featout(
+    root='./data', train=True, download=True, transform=transform
+)
+trainloader = torch.utils.data.DataLoader(
+    trainset, batch_size=4, shuffle=True, num_workers=0
+)
+# don't need any transformations here, so use normal testloader
 testset = torchvision.datasets.CIFAR10(
     root='./data', train=False, download=True, transform=transform
 )
 testloader = torch.utils.data.DataLoader(
-    testset, batch_size=4, shuffle=False, num_workers=2
+    testset, batch_size=4, shuffle=False, num_workers=0
 )
 
 classes = (
@@ -30,12 +41,12 @@ classes = (
     'truck'
 )
 
+# define model and optimizer
 net = Net()
-
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-for epoch in range(5):  # loop over the dataset multiple times
+for epoch in range(5):
 
     running_loss = 0.0
     blurred_set = []
@@ -51,11 +62,6 @@ for epoch in range(5):  # loop over the dataset multiple times
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-
-        # if correct classification (achtung: batches)
-        # compute cam
-        # blurr part
-        # append to some extra dataset
 
         # print statistics
         running_loss += loss.item()
