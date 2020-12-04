@@ -10,8 +10,8 @@ import torchvision.transforms.functional as TF
 from torchvision import models
 import torch.optim as optim
 
-from featout.model import Net
-from featout.featout_dataset import Featout
+from model import Net
+from featout.featout_dataset import get_featout_dataset
 
 # augmentation
 transform = transforms.Compose(
@@ -22,11 +22,16 @@ transform = transforms.Compose(
 )
 
 # USE NEW CLASS
-trainset = Featout(
-    root='./data', train=True, download=True, transform=transform
+trainset = get_featout_dataset(
+    torchvision.datasets.CIFAR10,
+    root='./data',
+    train=True,
+    download=True,
+    transform=transform
 )
+# TODO: shuffle set to false for tests
 trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=4, shuffle=True, num_workers=0
+    trainset, batch_size=4, shuffle=False, num_workers=0
 )
 # don't need any transformations here, so use normal testloader
 testset = torchvision.datasets.CIFAR10(
@@ -52,10 +57,10 @@ for epoch in range(5):
     blurred_set = []
 
     # iterate over training set and select the images that were correct
-    if (epoch) % 2 == 0:  # change to every 2nd epoch etc
+    if (epoch) % 2 == 0:  # TODO change to every 2nd epoch etc
         trainloader.dataset.start_featout(net)
 
-    for i, data in enumerate(trainloader, 0):
+    for i, data in enumerate(trainloader, 10000):  # TODO
         # get the inputs
         inputs, labels = data
         # zero the parameter gradients

@@ -1,5 +1,6 @@
 .vscode/
 __pycache__/
+outputs/
 data/
 trained_models/
 project_featout.code-workspace
