@@ -20,12 +20,15 @@ class Featout(torch.utils.data.Dataset):
         self.dataset = dataset
         # initial stage: no blurring
         self.featout = False
-        self.plotting = "outputs"
+        self.plotting = None  # "outputs" # set to save outputs
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, index):
+        """
+        Main workflow: Get image, if label correct, then blur and return that
+        """
         image, label = self.dataset.__getitem__(index)
 
         if self.featout:
@@ -45,7 +48,7 @@ class Featout(torch.utils.data.Dataset):
                 blurred_image = self.blur_method(
                     in_img, (max_x, max_y), patch_radius=4
                 )
-                # TODO: test by saving the image before and after
+                # save images before and after
                 if self.plotting is not None:
                     new_grads = torch.squeeze(
                         self.algorithm(
@@ -84,7 +87,7 @@ class Featout(torch.utils.data.Dataset):
         self.blur_method = blur_method
         self.gradient_algorithm = algorithm
 
-    def stop_featout(self, ):
+    def stop_featout(self):
         self.featout = False
 
 

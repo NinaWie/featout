@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+import time
 import numpy as np
 
 import torch
@@ -21,10 +21,11 @@ transform = transforms.Compose(
     ]
 )
 
-# USE NEW CLASS
+# take cifar
 original_trainset = torchvision.datasets.CIFAR10(
     root='./data', train=True, download=True, transform=transform
 )
+# and wrap with featout
 trainset = Featout(original_trainset)
 # TODO: shuffle set to false for tests --> change back
 trainloader = torch.utils.data.DataLoader(
@@ -48,13 +49,13 @@ net = Net()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-for epoch in range(5):
-
+for epoch in range(10):
+    tic = time.time()
     running_loss = 0.0
     blurred_set = []
 
     # iterate over training set and select the images that were correct
-    if (epoch) % 2 == 0:  # TODO change to every 2nd epoch etc
+    if epoch > 5:  # TODO change to every 2nd epoch etc
         trainloader.dataset.start_featout(net)
 
     for i, data in enumerate(trainloader, 10000):  # TODO
@@ -78,9 +79,7 @@ for epoch in range(5):
             )
             running_loss = 0.0
 
-    # blurr part
-
-    # Train on extra dataset
+    print(f"time for epoch: {time.time()-tic}")
 
     # Evaluate test performance
     correct = 0
@@ -96,6 +95,9 @@ for epoch in range(5):
         'Accuracy of the network on the 10000 test images: %d %%' %
         (100 * correct / total)
     )
+
+    # stop featout
+    trainloader.dataset.stop_featout()
 
 # Save model
 print('Finished Training')
