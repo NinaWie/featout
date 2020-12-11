@@ -6,3 +6,4 @@ trained_models/
 project_featout.code-workspace
 .DS_Store
 backups/
+*.ipynb

@@ -11,7 +11,7 @@ from torchvision import models
 import torch.optim as optim
 
 from model import Net
-from featout.featout_dataset import get_featout_dataset
+from featout.featout_dataset import Featout
 
 # augmentation
 transform = transforms.Compose(
@@ -22,14 +22,11 @@ transform = transforms.Compose(
 )
 
 # USE NEW CLASS
-trainset = get_featout_dataset(
-    torchvision.datasets.CIFAR10,
-    root='./data',
-    train=True,
-    download=True,
-    transform=transform
+original_trainset = torchvision.datasets.CIFAR10(
+    root='./data', train=True, download=True, transform=transform
 )
-# TODO: shuffle set to false for tests
+trainset = Featout(original_trainset)
+# TODO: shuffle set to false for tests --> change back
 trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=4, shuffle=False, num_workers=0
 )
