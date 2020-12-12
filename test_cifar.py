@@ -10,19 +10,22 @@ import torchvision.transforms.functional as TF
 from torchvision import models
 import torch.optim as optim
 
-from model import Net
+from models.mnist_model import Net
 from featout.featout_dataset import Featout
+
+DATASET = torchvision.datasets.MNIST  # CIFAR10
 
 # augmentation
 transform = transforms.Compose(
     [
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Normalize((0.1307, ), (0.3081, ))
+        # for cifar: (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ]
 )
 
 # take cifar
-original_trainset = torchvision.datasets.CIFAR10(
+original_trainset = DATASET(
     root='./data', train=True, download=True, transform=transform
 )
 # and wrap with featout
@@ -32,16 +35,11 @@ trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=4, shuffle=False, num_workers=0
 )
 # don't need any transformations here, so use normal testloader
-testset = torchvision.datasets.CIFAR10(
+testset = DATASET(
     root='./data', train=False, download=True, transform=transform
 )
 testloader = torch.utils.data.DataLoader(
     testset, batch_size=4, shuffle=False, num_workers=0
-)
-
-classes = (
-    'plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship',
-    'truck'
 )
 
 # define model and optimizer
@@ -55,7 +53,7 @@ for epoch in range(10):
     blurred_set = []
 
     # iterate over training set and select the images that were correct
-    if epoch > 5:  # TODO change to every 2nd epoch etc
+    if epoch > 1:  # TODO change to every 2nd epoch etc
         trainloader.dataset.start_featout(net)
 
     for i, data in enumerate(trainloader, 10000):  # TODO

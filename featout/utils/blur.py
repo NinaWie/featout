@@ -19,7 +19,7 @@ def blur_around_max(img, max_coordinates, patch_radius=4, kernel_size=5):
 
     # smooth only the patch (padded)
     # TODO: instead of padding use real surroundings of patch
-    smoothing = GaussianSmoothing(3, kernel_size, 1)
+    smoothing = GaussianSmoothing(img.size()[1], kernel_size, sigma=1)
     patch_pad = F.pad(patch, (2, 2, 2, 2), mode='reflect')
     smoothed_patch = smoothing(patch_pad)
 

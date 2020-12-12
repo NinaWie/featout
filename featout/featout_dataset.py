@@ -38,9 +38,8 @@ class Featout(torch.utils.data.Dataset):
             _, predicted_lab = torch.max(self.featout_model(in_img).data, 1)
             # only do featout if it was predicted correctly
             if predicted_lab == label:
-                gradients = torch.squeeze(
-                    self.algorithm(self.featout_model, in_img, label)
-                ).numpy()
+                gradients = self.algorithm(self.featout_model, in_img,
+                                           label)[0].numpy()
                 # Compute point of maximum activation
                 max_x, max_y = get_max_activation(gradients)
 
@@ -65,7 +64,7 @@ class Featout(torch.utils.data.Dataset):
                         )
                     )
 
-                image = torch.squeeze(blurred_image)
+                image = blurred_image[0]
 
         return image, label
 
