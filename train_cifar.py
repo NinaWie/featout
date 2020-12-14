@@ -56,7 +56,7 @@ for epoch in range(10):
     if epoch > 1:  # TODO change to every 2nd epoch etc
         trainloader.dataset.start_featout(net)
 
-    for i, data in enumerate(trainloader, 10000):  # TODO
+    for i, data in enumerate(trainloader):
         # get the inputs
         inputs, labels = data
         # zero the parameter gradients

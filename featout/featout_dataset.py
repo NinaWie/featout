@@ -49,11 +49,9 @@ class Featout(torch.utils.data.Dataset):
                 )
                 # save images before and after
                 if self.plotting is not None:
-                    new_grads = torch.squeeze(
-                        self.algorithm(
-                            self.featout_model, blurred_image, label
-                        )
-                    ).numpy()
+                    new_grads = self.algorithm(
+                        self.featout_model, blurred_image, label
+                    )[0].numpy()
                     plot_together(
                         image,
                         gradients,
