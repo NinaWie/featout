@@ -10,34 +10,49 @@ import torchvision.transforms as transforms
 
 import torch.optim as optim
 
-from models.mnist_model import Net
+from models.mnist_model import Net as mnist_net
+from models.cifar_model import Net as cifar_net
 from featout.featout_dataset import Featout
 from featout.interpret import simple_gradient_saliency
 from featout.utils.blur import zero_out, blur_around_max
 
-NR_EPOCHS = 10  # 20
-NR_RUNS = 10  # 10
+DATASET_INFOS = {
+    "mnist":
+        {
+            "load": torchvision.datasets.MNIST,
+            "normalize": ((0.1307, ), (0.3081, )),
+            "model": mnist_net
+        },
+    "cifar":
+        {
+            "load": torchvision.datasets.CIFAR10,
+            "normalize": ((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            "model": cifar_net
+        }
+}
+# decide which dataset to use
+DATASET = "cifar"
+
+NR_EPOCHS = 20
+NR_RUNS = 10
 RADIUS = 3
 INTERPRET = simple_gradient_saliency
 BLUR_OR_ZERO = blur_around_max
 
-MODEL_PATH = "trained_models/mnist"
-ID = "m2"
-DO_FEATOUT = 1
+MODEL_PATH = "trained_models/cifar"
+ID = "m"
+DO_FEATOUT = 0
 
-DATASET = torchvision.datasets.MNIST  # CIFAR10
+data_info = DATASET_INFOS[DATASET]
 
 # augmentation
 transform = transforms.Compose(
-    [
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307, ), (0.3081, ))
-        # for cifar: (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ]
+    [transforms.ToTensor(),
+     transforms.Normalize(*data_info["normalize"])]
 )
 
 # take cifar
-original_trainset = DATASET(
+original_trainset = data_info["load"](
     root='./data', train=True, download=True, transform=transform
 )
 # and wrap with featout
@@ -47,7 +62,7 @@ trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=4, shuffle=False, num_workers=0
 )
 # don't need any transformations here, so use normal testloader
-testset = DATASET(
+testset = data_info["load"](
     root='./data', train=False, download=True, transform=transform
 )
 testloader = torch.utils.data.DataLoader(
@@ -56,7 +71,7 @@ testloader = torch.utils.data.DataLoader(
 
 for j in range(NR_RUNS):
     # define model and optimizer
-    net = Net()
+    net = data_info["model"]()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
