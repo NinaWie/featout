@@ -66,3 +66,10 @@ def plot_together(
     plt.imshow(get_overlayed_img(blurred_image, new_grads))
     plt.title(f"After: max at x={new_max_x}, y={new_max_y}")
     plt.savefig(save_path)
+
+
+def plot_blurred(img, save_path):
+    plt.figure(figsize=(10, 10))
+    plt.imshow(transform_cifar(img))
+    plt.title("input_ann")
+    plt.savefig(save_path)

@@ -6,7 +6,7 @@ from featout.utils.utils import get_max_activation
 from featout.interpret import simple_gradient_saliency
 from featout.utils.blur import zero_out, blur_around_max
 from captum.attr import visualization as viz
-from featout.utils.plotting import plot_together
+from featout.utils.plotting import plot_together, plot_blurred
 
 
 class Featout(torch.utils.data.Dataset):
@@ -45,7 +45,7 @@ class Featout(torch.utils.data.Dataset):
 
                 # blurr out and write into image variable
                 blurred_image = self.blur_method(
-                    in_img, (max_x, max_y), patch_radius=4
+                    in_img, (max_x, max_y), patch_radius=self.patch_rad
                 )
                 # save images before and after
                 if self.plotting is not None:
@@ -70,7 +70,8 @@ class Featout(torch.utils.data.Dataset):
         self,
         model,
         blur_method=blur_around_max,
-        algorithm=simple_gradient_saliency
+        algorithm=simple_gradient_saliency,
+        patch_radius=4
     ):
         """
         We can set here whether we want to blur or zero and what gradient alg
@@ -83,6 +84,7 @@ class Featout(torch.utils.data.Dataset):
         self.featout_model = model
         self.blur_method = blur_method
         self.gradient_algorithm = algorithm
+        self.patch_rad = patch_radius
 
     def stop_featout(self):
         self.featout = False
