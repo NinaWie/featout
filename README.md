@@ -7,7 +7,10 @@ Convolutional Neural Networks (CNNs) have found extensive application in recent 
 ![Featout](assets/featout.png)
 
 ### Task:
-Implement a simple version of a “Featout” pipeline and demonstrate it on an image dataset! The basic idea is to modify the training dataset based on the model’s attention. You are free to choose 1) the dataset, 2) the model architecture, 3) how to derive the model’s attention, and 4) how to modify the input data. Some hints on each of these points:
+Implement a simple version of a “Featout” pipeline and demonstrate it on an image dataset! The goal of the project is to show superiority of Featout over normal training on a selected dataset. To do so, you need to implement the Featout method (see below for starting code), and select a dataset for training and testing where targeted data augmentation is of advantage. For example, you could make a table / figure reporting the test data accuracy for normal training and for the featout training pipeline.
+
+While you are free to choose methods, you should stick to the basic idea of modifying the the training dataset based on the model’s attention. You need to select 1) the dataset, 2) the model architecture, 3) methods to derive the model’s attention, and 4) methods to modify the input data. Some hints on each of these points:
+
 * Dataset: Think about when the Featout method could be most successful. In particular, it might not make sense to use a super large dataset that already covers very diverse samples for each class. Also, you could try to demonstrate that Featout helps to generalize to different data (make the test data significantly different from the training data, e.g. different light / blur)
 * Model: Probably, any architecture should be fine, but some model architectures support interpretability
 * Model attention: Note that the model’s attention must be derived *efficiently*. Since the dataset should be modified during training, a method with too much computational effort is not feasible. Thus, gradient-based methods are most suitable (this repo uses a simple gradient saliency method, see [here](featout/interpret.py))
