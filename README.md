@@ -8,10 +8,10 @@ Convolutional Neural Networks (CNNs) have found extensive application in recent 
 
 ### Task:
 Implement a simple version of a “Featout” pipeline and demonstrate it on an image dataset! The basic idea is to modify the training dataset based on the model’s attention. You are free to choose 1) the dataset, 2) the model architecture, 3) how to derive the model’s attention, and 4) how to modify the input data. Some hints on each of these points:
-* 1) Dataset: Think about when the Featout method could be most successful. In particular, it might not make sense to use a super large dataset that already covers very diverse samples for each class. Also, you could try to demonstrate that Featout helps to generalize to different data (make the test data significantly different from the training data, e.g. different light / blur)
-* 2) Model: Probably, any architecture should be fine, but some model architectures support interpretability
-* 3) Model attention: Note that the model’s attention must be derived *efficiently*. Since the dataset should be modified during training, a method with too much computational effort is not feasible. Thus, gradient-based methods are most suitable (this repo uses a simple gradient saliency method, see [here](featout/interpret.py))
-* 4) Feature removal: The idea is to prevent the model from learning the same features in the next epoch. It is up to you how to do this. In this repo, the parts of the image with most attention are either blurred or masked with zeros (see [here](featout/utils/blur.py))
+* Dataset: Think about when the Featout method could be most successful. In particular, it might not make sense to use a super large dataset that already covers very diverse samples for each class. Also, you could try to demonstrate that Featout helps to generalize to different data (make the test data significantly different from the training data, e.g. different light / blur)
+* Model: Probably, any architecture should be fine, but some model architectures support interpretability
+* Model attention: Note that the model’s attention must be derived *efficiently*. Since the dataset should be modified during training, a method with too much computational effort is not feasible. Thus, gradient-based methods are most suitable (this repo uses a simple gradient saliency method, see [here](featout/interpret.py))
+* Feature removal: The idea is to prevent the model from learning the same features in the next epoch. It is up to you how to do this. In this repo, the parts of the image with most attention are either blurred or masked with zeros (see [here](featout/utils/blur.py))
 
 
 ### Deliverables:
@@ -19,6 +19,24 @@ Submit a link to your GitHub repository, as well as a graphical abstract of your
 
 ### Getting started: 
 For inspiration, we provide a codebase with a simple implementation of Featout in this repository. In the folder “papers”, you can find some related work. The one that is most related to the Featout idea is the paper by Wang et al [4] proposing a method called CamDrop.
+
+### Installation
+
+The required packages are listed in the [requirements](requirements.txt) file.
+
+You can install this repository and all required dependencies in a virtual environment by running
+```
+git clone https://github.com/NinaWie/featout.git
+cd featout
+python -m venv env
+source env/bin/activate
+pip install -e .
+```
+
+Then, you can run the training with a simple featout-pipeline by executing the following:
+```
+python train_featout.py
+```
 
 ### References
 
