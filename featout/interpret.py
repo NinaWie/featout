@@ -4,8 +4,6 @@ from captum.attr import DeepLift
 from captum.attr import NoiseTunnel
 from captum.attr import visualization as viz
 import numpy as np
-import torch
-
 
 def simple_gradient_saliency(net, input_img, label):
     """
