@@ -7,10 +7,11 @@ def get_max_activation(gradients, filter_size=3):
     Get the coordinates where the activation is maximal
     Includes smoothing with an all-ones filter of size filter_size
     """
-    # TODO: make the following lines more flexible, was for testing
     grads_mean = np.mean(gradients, axis=0)
     filtered = convolve2d(
-        grads_mean, np.ones((filter_size, filter_size)), mode="same"
+        grads_mean,
+        np.ones((filter_size, filter_size)),
+        mode="same",
     )
     max_act = np.argmax(filtered.flatten())
     max_x = max_act // grads_mean.shape[1]

@@ -6,8 +6,6 @@ import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
-
-from torchvision import models
 import torch.optim as optim
 
 from models.mnist_model import Net
@@ -21,7 +19,7 @@ BLUR_METHOD = blur_around_max
 # algorithm to derive the model's attention
 ATTENTION_ALGORITHM = simple_gradient_saliency
 # set this path to some folder, e.g., "outputs", if you want to plot the results
-PLOTTING_PATH = "outputs"
+PLOTTING_PATH = None
 if PLOTTING_PATH is not None:
     os.makedirs(PLOTTING_PATH, exist_ok=True)
 

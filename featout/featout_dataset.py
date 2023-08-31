@@ -45,23 +45,26 @@ class Featout(torch.utils.data.Dataset):
         if self.featout:
             in_img = torch.unsqueeze(image, 0)
 
-            # run a prediction with the given model
+            # run a prediction with the given model --> TODO: this can be done
+            # more efficiently by passing the predicted labels from the
+            # preceding epoch to this class
             _, predicted_lab = torch.max(
                 self.featout_model(in_img).data, 1
             )
             # only do featout if it was predicted correctly
             if predicted_lab == label:
+                # get model attention via gradient based method
                 gradients = self.algorithm(
                     self.featout_model, in_img, label
                 )[0].numpy()
                 # Compute point of maximum activation
                 max_x, max_y = get_max_activation(gradients)
 
-                # blur patch with maximum activation
+                # blur patch at activation (feat-out)
                 blurred_image = self.blur_method(
                     in_img, (max_x, max_y), patch_radius=4
                 )
-                # save images before and after
+                # save images before and after if plotting is desired
                 if self.plotting is not None:
                     new_grads = self.algorithm(
                         self.featout_model,
@@ -92,14 +95,11 @@ class Featout(torch.utils.data.Dataset):
         """
         We can set here whether we want to blur or zero and what gradient alg
         """
-        # TODO: pass predicted labels because we only do featout if it is
-        # predicted correctly
-        print("start featout")
+        print("starting featout")
         self.featout = True
-        self.algorithm = simple_gradient_saliency
+        self.algorithm = algorithm
         self.featout_model = model
         self.blur_method = blur_method
-        self.gradient_algorithm = algorithm
 
     def stop_featout(self):
         self.featout = False
