@@ -18,7 +18,7 @@ Implement a simple version of a “Featout” pipeline and demonstrate it on an 
 Submit a link to your GitHub repository, as well as a graphical abstract of your solution. The Readme should describe your solution.
 
 ### Getting started: 
-For inspiration, we provide a codebase with a simple implementation of Featout in this repository. In the folder “papers”, you can find some related work. The one that is most related to the Featout idea is the paper by Wang et al [4] proposing a method called CamDrop.
+For inspiration, we provide a codebase with a simple implementation of Featout in this repository. In the folder “papers”, you can find some related work. The one that is most related to the Featout idea is the paper by Wang et al [4] proposing a method called CamDrop (they use class activation maps to get the models attention and then drop the neurons at the points of highest activation).
 
 ### Installation
 

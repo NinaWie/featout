@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 
@@ -5,15 +6,24 @@ import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
-import torchvision.transforms.functional as TF
 
 from torchvision import models
 import torch.optim as optim
 
 from models.mnist_model import Net
 from featout.featout_dataset import Featout
+from featout.utils.blur import blur_around_max
+from featout.interpret import simple_gradient_saliency
 
 DATASET = torchvision.datasets.MNIST  # CIFAR10
+# method how to remove features - here by default blurring
+BLUR_METHOD = blur_around_max
+# algorithm to derive the model's attention
+ATTENTION_ALGORITHM = simple_gradient_saliency
+# set this path to some folder, e.g., "outputs", if you want to plot the results
+PLOTTING_PATH = "outputs"
+if PLOTTING_PATH is not None:
+    os.makedirs(PLOTTING_PATH, exist_ok=True)
 
 # augmentation
 transform = transforms.Compose(
@@ -24,20 +34,22 @@ transform = transforms.Compose(
     ]
 )
 
-# take cifar
+# load the original dataset (it's downloaded automatically if not found)
 original_trainset = DATASET(
     root="./data",
     train=True,
     download=True,
     transform=transform,
 )
-# and wrap with featout
-trainset = Featout(original_trainset)
-# TODO: shuffle set to false for tests --> change back
+# wrap the dataset with featout
+trainset = Featout(original_trainset, PLOTTING_PATH)
+
+# the trainloader handles batching of the training set
 trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=4, shuffle=True, num_workers=0
 )
-# don't need any transformations here, so use normal testloader
+# for the test data, we don't need any transformations, so we take the original
+# dataset and put it into the dataloader (without shuffling)
 testset = DATASET(
     root="./data",
     train=False,
@@ -48,7 +60,7 @@ testloader = torch.utils.data.DataLoader(
     testset, batch_size=4, shuffle=False, num_workers=0
 )
 
-# define model and optimizer
+# define model and optimizer (standard mnist model from torch is used)
 net = Net()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(
@@ -60,10 +72,15 @@ for epoch in range(10):
     running_loss = 0.0
     blurred_set = []
 
-    # START FEATOUT (first epoch uses unmodified dataset)
-    # iterate over training set and select the images that were correct
-    if epoch > 1:
-        trainloader.dataset.start_featout(net)
+    # START FEATOUT
+    # first epoch uses unmodified dataset, then we do it every epoch
+    # code could be changed to do it only every second epoch or so
+    if epoch > 0:
+        trainloader.dataset.start_featout(
+            net,
+            blur_method=BLUR_METHOD,
+            algorithm=ATTENTION_ALGORITHM,
+        )
 
     for i, data in enumerate(trainloader):
         # get the inputs
@@ -101,11 +118,11 @@ for epoch in range(10):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     print(
-        "Accuracy of the network on the 10000 test images: %d %%"
+        "Accuracy of the network on the test images: %d %%"
         % (100 * correct / total)
     )
 
-    # stop featout
+    # stop featout after every epoch
     trainloader.dataset.stop_featout()
 
 # Save model

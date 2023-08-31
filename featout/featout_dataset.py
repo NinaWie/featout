@@ -10,8 +10,17 @@ from featout.utils.plotting import plot_together
 
 
 class Featout(torch.utils.data.Dataset):
+    """
+    Inspired from https://discuss.pytorch.org/t/changing-transformation-applied-to-data-during-training/15671/3
+    Example usage:
+    dataset = Featout(normal arguments of super dataset)
+    loader = DataLoader(dataset, batch_size=2, num_workers=2, shuffle=True)
+    loader.dataset.start_featout(net)
+    """
 
-    def __init__(self, dataset, *args, **kwargs):
+    def __init__(
+        self, dataset, plotting_path, *args, **kwargs
+    ):
         """
         Args:
             dataset: torch Dataset object (must impelemnt getitem and len)
@@ -20,7 +29,8 @@ class Featout(torch.utils.data.Dataset):
         self.dataset = dataset
         # initial stage: no blurring
         self.featout = False
-        self.plotting = None  # "outputs" # set to save outputs
+        # set path where to save plots (set to None if no plotting desired)
+        self.plotting = plotting_path
 
     def __len__(self):
         return len(self.dataset)
@@ -29,28 +39,34 @@ class Featout(torch.utils.data.Dataset):
         """
         Main workflow: Get image, if label correct, then blur and return that
         """
+        # call method from base dataset
         image, label = self.dataset.__getitem__(index)
 
         if self.featout:
             in_img = torch.unsqueeze(image, 0)
 
-            # TODO: batch the whole gradient computing? would be a speed up
-            _, predicted_lab = torch.max(self.featout_model(in_img).data, 1)
+            # run a prediction with the given model
+            _, predicted_lab = torch.max(
+                self.featout_model(in_img).data, 1
+            )
             # only do featout if it was predicted correctly
             if predicted_lab == label:
-                gradients = self.algorithm(self.featout_model, in_img,
-                                           label)[0].numpy()
+                gradients = self.algorithm(
+                    self.featout_model, in_img, label
+                )[0].numpy()
                 # Compute point of maximum activation
                 max_x, max_y = get_max_activation(gradients)
 
-                # blurr out and write into image variable
+                # blur patch with maximum activation
                 blurred_image = self.blur_method(
                     in_img, (max_x, max_y), patch_radius=4
                 )
                 # save images before and after
                 if self.plotting is not None:
                     new_grads = self.algorithm(
-                        self.featout_model, blurred_image, label
+                        self.featout_model,
+                        blurred_image,
+                        label,
                     )[0].numpy()
                     plot_together(
                         image,
@@ -58,8 +74,9 @@ class Featout(torch.utils.data.Dataset):
                         blurred_image[0],
                         new_grads,
                         save_path=os.path.join(
-                            self.plotting, f"images_{index}.png"
-                        )
+                            self.plotting,
+                            f"images_{index}.png",
+                        ),
                     )
 
                 image = blurred_image[0]
@@ -70,7 +87,7 @@ class Featout(torch.utils.data.Dataset):
         self,
         model,
         blur_method=blur_around_max,
-        algorithm=simple_gradient_saliency
+        algorithm=simple_gradient_saliency,
     ):
         """
         We can set here whether we want to blur or zero and what gradient alg
@@ -86,11 +103,3 @@ class Featout(torch.utils.data.Dataset):
 
     def stop_featout(self):
         self.featout = False
-
-
-# Inspired from https://discuss.pytorch.org/t/changing-transformation-applied-to-data-during-training/15671/3
-# Example usage:
-
-# dataset = Featout(normal arguments of super dataset)
-# loader = DataLoader(dataset, batch_size=2, num_workers=2, shuffle=True)
-# loader.dataset.start_featout(net)
