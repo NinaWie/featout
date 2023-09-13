@@ -37,7 +37,8 @@ class Featout(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         """
-        Main workflow: Get image, if label correct, then blur and return that
+        Main workflow: Get image, if label correct, then featout (blur/zero)
+        and return the modified image
         """
         # call method from base dataset
         image, label = self.dataset.__getitem__(index)
@@ -95,7 +96,7 @@ class Featout(torch.utils.data.Dataset):
         """
         We can set here whether we want to blur or zero and what gradient alg
         """
-        print("starting featout")
+        print("\n STARTING FEATOUT \n ")
         self.featout = True
         self.algorithm = algorithm
         self.featout_model = model

@@ -40,6 +40,13 @@ Then, you can run the training with a simple featout-pipeline by executing the f
 ```
 python train_featout.py
 ```
+This will train for one epoch and then start FEATOUT. At the core of this codebase is the [Featout dataset](/featout/featout_dataset.py), a torch Dataset class that applies featout in the `__getitem__` method. In other words, everytime that a new batch is sampled, the  `__getitem__` method from this dataset is called. If featout is activated (class attribute `featout=True`), then the method applies an attention mechanism to find the features with highest activation, and blurs the feature.
+
+### First steps:
+
+At first, make sure that you understood the main idea, and have a short look at the [papers](papers). Then, you can **but don't have to** start from this repository. Maybe you would like to work with tensorflow or just want to implement your own pipeline - that is totally fine! In that case, the first step would be to select a dataset and model and make a normal CNN pipeline work. Maybe test whether standard Dropout improves the results. Then, implement the featour idea (find a suitable method to remove features from the data based on the model's attention).
+
+If you start from the code in this repository, first familiarize with the code of the [featout dataset](/featout/featout_dataset.py). This code is quite central and uses other functions in this repository, such as the code for [blurring](featout/blur.py) the feature or the function for [interpreting](featout/interpret.py) the model's attention.
 
 ### References
 
