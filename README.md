@@ -36,11 +36,15 @@ source env/bin/activate
 pip install -e .
 ```
 
+### RUN featout example
+
 Then, you can run the training with a simple featout-pipeline by executing the following:
 ```
 python train_featout.py
 ```
 This will train for one epoch and then start FEATOUT. At the core of this codebase is the [Featout dataset](/featout/featout_dataset.py), a torch Dataset class that applies featout in the `__getitem__` method. In other words, everytime that a new batch is sampled, the  `__getitem__` method from this dataset is called. If featout is activated (class attribute `featout=True`), then the method applies an attention mechanism to find the features with highest activation, and blurs the feature.
+
+**NOTE: The same code is provided in a [jupyter notebook](featout_jupyter.ipynb), if you prefer notebooks or want to use it in colab**
 
 ### First steps:
 

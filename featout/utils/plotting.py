@@ -20,6 +20,7 @@ def show_grid(images, transpose=True, save_path=None):
 
 
 def transform_cifar(img):
+    """for cifar, we need to transform the images"""
     return np.transpose(
         (img.cpu().detach().numpy() / 2) + 0.5, (1, 2, 0)
     )
@@ -65,7 +66,7 @@ def plot_together(
     # Make figure
     plt.figure(figsize=(20, 10))
     plt.subplot(1, 4, 1)
-    plt.imshow(transform_cifar(image))
+    plt.imshow(image)
     plt.title("Original input image")
     plt.subplot(1, 4, 2)
     plt.imshow(get_overlayed_img(image, gradients))
@@ -73,7 +74,7 @@ def plot_together(
         f"Model attention BEFORE blurring (max at x={max_x}, y={max_y})"
     )
     plt.subplot(1, 4, 3)
-    plt.imshow(transform_cifar(blurred_image))
+    plt.imshow(blurred_image)
     plt.title("Modified input image (blurred)")
     plt.subplot(1, 4, 4)
     plt.imshow(get_overlayed_img(blurred_image, new_grads))
